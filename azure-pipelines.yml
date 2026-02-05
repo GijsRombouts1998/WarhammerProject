@@ -1,0 +1,57 @@
+trigger:
+- main
+
+variables:
+  appName: warhammerAppGR
+  location: swedencentral
+  resourceGroup: rg-warhammerAppGR
+
+stages:
+
+# -------------------------
+# Stage 1 - Deploy Infra
+# -------------------------
+- stage: DeployInfra
+  displayName: Deploy Azure Infrastructure
+  jobs:
+  - job: DeployInfraJob
+    displayName: Create App Service via Bicep
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: AzureCLI@2
+      displayName: Deploy Bicep
+      inputs:
+        azureSubscription: azure-sc-main
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Creating resource group..."
+          az group create \
+            --name $(resourceGroup) \
+            --location $(location)
+
+          echo "Deploying infrastructure..."
+          az deployment group create \
+            --resource-group $(resourceGroup) \
+            --template-file infra/main.bicep \
+            --parameters appName=$(appName) location=$(location)
+
+# -------------------------
+# Stage 2 - Deploy Frontend
+# -------------------------
+- stage: DeployFrontend
+  displayName: Deploy HTML Frontend
+  dependsOn: DeployInfra
+  jobs:
+  - job: DeployFrontendJob
+    displayName: Upload HTML to App Service
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: AzureWebApp@1
+      displayName: Deploy to App Service
+      inputs:
+        azureSubscription: azure-sc-main
+        appName: $(appName)
+        package: frontend
