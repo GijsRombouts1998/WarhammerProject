@@ -1,9 +1,7 @@
 name: Deploy Azure Web App
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 env:
   APP_NAME: warhammerAppGR

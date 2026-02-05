@@ -1,7 +1,9 @@
 name: Destroy Azure Resources
 
 on:
-  workflow_dispatch:  # Handmatig triggeren
+  workflow_dispatch:
+  schedule:
+    - cron: "30 2 * * *"
 
 env:
   RESOURCE_GROUP: rg-warhammerAppGR
