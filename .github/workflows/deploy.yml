@@ -1,0 +1,42 @@
+name: Deploy Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  APP_NAME: warhammerAppGR
+  LOCATION: swedencentral
+  RESOURCE_GROUP: rg-warhammerAppGR
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Create resource group
+      run: |
+        az group create -n $RESOURCE_GROUP -l $LOCATION
+
+    - name: Deploy Bicep
+      run: |
+        az deployment group create \
+          --resource-group $RESOURCE_GROUP \
+          --template-file infra/main.bicep \
+          --parameters appName=$APP_NAME location=$LOCATION
+
+    - name: Deploy HTML frontend
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.APP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: frontend
