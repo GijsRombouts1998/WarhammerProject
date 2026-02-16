@@ -21,9 +21,14 @@ jobs:
 
     - name: Delete Resource Group if exists
       run: |
-        if az group exists --name $RESOURCE_GROUP; then
+        EXISTS=$(az group exists --name $RESOURCE_GROUP)
+
+        echo "Resource group exists: $EXISTS"
+
+        if [ "$EXISTS" = "true" ]; then
           echo "Deleting resource group..."
           az group delete -n $RESOURCE_GROUP --yes --no-wait
+          echo "Delete command sent."
         else
-          echo "Resource group does not exist."
+          echo "Nothing to delete."
         fi
