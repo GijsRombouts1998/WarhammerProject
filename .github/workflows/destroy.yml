@@ -13,14 +13,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Login to Azure
-      uses: azure/login@v1
+    - uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Delete Resource Group
+    - name: Delete Resource Group if exists
       run: |
-        az group delete -n $RESOURCE_GROUP --yes --no-wait
+        if az group exists --name $RESOURCE_GROUP; then
+          echo "Deleting resource group..."
+          az group delete -n $RESOURCE_GROUP --yes --no-wait
+        else
+          echo "Resource group does not exist."
+        fi
