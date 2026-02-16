@@ -6,7 +6,7 @@ on:
     - cron: "30 2 * * *"
 
 env:
-  RESOURCE_GROUP: rg-warhammerAppGR
+  RESOURCE_GROUP: rg-sandbox
 
 jobs:
   destroy:
